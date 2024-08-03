@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.note.component.sheet
+package com.example.notesapp.feature.note.component.sheet
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

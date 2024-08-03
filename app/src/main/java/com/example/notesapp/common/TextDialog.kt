@@ -20,7 +20,7 @@ fun TextDialog(
     title: String = stringResource(id = R.string.warning_title),
     description: String = stringResource(id = R.string.delete_confirmation_text),
     onDismissCallBack: () -> Unit,
-    onConfirmCallBack: () -> Unit,
+    onConfirmCallBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     if (isOpened) {
@@ -60,17 +60,19 @@ fun TextDialog(
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = { onConfirmCallBack() },
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.confirm),
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
+                if (onConfirmCallBack != null) {
+                    TextButton(
+                        onClick = { onConfirmCallBack() },
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.confirm),
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         )
-                    )
+                    }
                 }
             },
             shape = RoundedCornerShape(8.dp),

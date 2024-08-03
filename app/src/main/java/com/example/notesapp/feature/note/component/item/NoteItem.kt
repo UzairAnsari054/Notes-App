@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.note.component.item
+package com.example.notesapp.feature.note.component.item
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.note
+package com.example.notesapp.feature.note
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf

@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.note_creation
+package com.example.notesapp.feature.note_creation
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData

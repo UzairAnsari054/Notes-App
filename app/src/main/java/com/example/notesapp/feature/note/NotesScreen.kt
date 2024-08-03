@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.note
+package com.example.notesapp.feature.note
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,11 +7,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -23,22 +29,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.notesapp.R
 import com.example.notesapp.common.LoadingDialog
 import com.example.notesapp.common.TextDialog
 import com.example.notesapp.data.model.NoteModel
-import com.example.notesapp.ui.note.component.drawer.NavDrawer
-import com.example.notesapp.ui.note.component.item.NoteItem
-import com.example.notesapp.ui.note.component.navbar.TopNavAppBar
-import com.example.notesapp.ui.note.component.sheet.FilterSheet
+import com.example.notesapp.feature.note.component.drawer.NavDrawer
+import com.example.notesapp.feature.note.component.item.NoteItem
+import com.example.notesapp.feature.note.component.navbar.TopNavAppBar
+import com.example.notesapp.feature.note.component.sheet.FilterSheet
+import com.example.notesapp.navigation.Route
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesScreen(
-    viewModel: NoteViewModel = hiltViewModel()
+    viewModel: NoteViewModel = hiltViewModel(),
+    navController: NavHostController
 ) {
 
     val noteListState = viewModel.noteList.observeAsState()
@@ -142,7 +154,33 @@ fun NotesScreen(
                     )
                 },
                 snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-                floatingActionButton = {},
+                floatingActionButton = {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            viewModel.closeMarkEvent()
+                            viewModel.closeSearchEvent()
+
+                            navController.navigate(Route.NoteCreationScreen.routeName)
+                        },
+                        text = {
+                            Text(
+                                stringResource(R.string.add),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(R.string.fab)
+                            )
+                        },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
                 content = { contentPadding ->
                     Box(modifier = Modifier.padding(contentPadding)) {
                         LazyColumn(
@@ -167,7 +205,7 @@ fun NotesScreen(
                                             viewModel.closeMarkEvent()
                                             viewModel.closeSearchEvent()
 
-                                            // Panga (Navigation)
+                                            navController.navigate("${Route.NoteDetailScreen.routeName}/${it.id}")
                                         }
                                     },
                                     onCheckClick = { viewModel.addToMarkedNoteList(it) },

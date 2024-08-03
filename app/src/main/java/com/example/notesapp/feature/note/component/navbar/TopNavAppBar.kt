@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.note.component.navbar
+package com.example.notesapp.feature.note.component.navbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row

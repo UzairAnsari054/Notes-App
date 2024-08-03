@@ -1,58 +1,77 @@
 package com.example.notesapp.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
+import com.example.notesapp.data.local.datastore.NoteDataStore
+import com.example.notesapp.ui.ColorSchemeChoice
+import com.example.notesapp.utils.ColorPalletName
+import com.example.notesapp.utils.ColorSchemeName
+import com.example.notesapp.utils.Constants
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 @Composable
 fun NotesAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val dataStore = NoteDataStore(LocalContext.current)
+    val scope = rememberCoroutineScope()
+
+    fun setColorPallet(colorPallet: String) {
+        scope.launch {
+            dataStore.setStringData(Constants.COLOR_PALLET, colorPallet)
+        }
     }
 
+    fun setColorScheme(colorScheme: String) {
+        scope.launch {
+            dataStore.setStringData(Constants.COLOR_SCHEME, colorScheme)
+        }
+    }
+
+    val colorScheme = remember {
+        val scheme = if (darkTheme) ColorSchemeName.DARK_MODE else ColorSchemeName.LIGHT_MODE
+
+        mutableStateOf(ColorSchemeChoice.getColorScheme(scheme, ColorPalletName.PURPLE))
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        val colorSchemeFlow = dataStore.getStringData(Constants.COLOR_SCHEME)
+        val colorPalletFlow = dataStore.getStringData(Constants.COLOR_PALLET)
+
+        val combinedFLow = combine(
+            colorSchemeFlow, colorPalletFlow
+        ) { scheme, pallet ->
+            val defaultScheme =
+                scheme.ifEmpty { if (darkTheme) ColorSchemeName.DARK_MODE else ColorSchemeName.LIGHT_MODE }
+            val defaultPallet = pallet.ifEmpty { ColorPalletName.PURPLE }
+
+            setColorScheme(defaultScheme)
+            setColorPallet(defaultPallet)
+
+            Pair(defaultScheme, defaultPallet)
+        }
+
+        combinedFLow.collect {
+            colorScheme.value = ColorSchemeChoice.getColorScheme(it.first, it.second)
+        }
+    }
+
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        darkIcons = !darkTheme, color = colorScheme.value.primary
+    )
+
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        colorScheme = colorScheme.value, typography = Typography, content = content
     )
 }

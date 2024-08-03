@@ -1,5 +1,7 @@
-package com.example.notesapp.ui.note_detail
+package com.example.notesapp.feature.note_detail
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.notesapp.data.NoteRepository
@@ -18,6 +20,11 @@ class NoteDetailViewModel @Inject constructor(
 
     val loader = MutableLiveData(false)
     val noteDetails: MutableLiveData<Result<NoteModel>> = MutableLiveData()
+
+    var isEditing: MutableState<Boolean> = mutableStateOf(false)
+
+    var title: MutableState<String> = mutableStateOf("")
+    var description: MutableState<String> = mutableStateOf("")
 
     suspend fun getNoteById(id: Int): Result<Boolean> =
         withContext(Dispatchers.IO) {
